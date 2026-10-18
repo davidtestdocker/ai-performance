@@ -2,7 +2,7 @@
 
 這份規劃直接對應職缺的四項工作：**測試自動化與數據分析、機器學習效能分析、LLM 訓練效能分析、分散式系統軟硬體調校**。唯一硬體限制是最多一張 GPU。作品主角是效能工程方法與可重現的診斷；本機或雲端 Linux 單卡皆可完成核心作品。已有叢集可以用作實驗環境，但不決定作品題目。
 
-依[模組學習路線](curriculum/ROADMAP.md)、[技術觀念講義](curriculum/CONCEPTS.md)與[作品成果對照](curriculum/OUTCOMES.md)進行，實際結果記在[學習進度](PROGRESS.md)：每個模組學觀念、寫程式、做實驗、分析結果，再把實際成果接到下一個模組。**不設定週數或每日進度。**下方是最終作品設計，各模組文件是實作入口。
+依[模組學習路線](curriculum/ROADMAP.md)、[工具選型分析](curriculum/TOOL_SELECTION.md)、[技術觀念講義](curriculum/CONCEPTS.md)與[作品成果對照](curriculum/OUTCOMES.md)進行，實際結果記在[學習進度](PROGRESS.md)：每個模組學觀念、寫程式、做實驗、分析結果，再把實際成果接到下一個模組。**不設定週數或每日進度。**下方是最終作品設計，各模組文件是實作入口。
 
 ## 最終成果
 
@@ -13,7 +13,7 @@
 | 測試自動化與數據分析 | 可重跑的實驗 CLI、環境快照、原始數據、統計與回歸判定 | 最高 |
 | ML 效能分析 | 真實資料載入、前反向、CPU/GPU timeline、瓶頸調校案例 | 高 |
 | LLM 訓練效能分析 | decoder-only 訓練與開源模型微調、tokens/s、顯存、profile、受控 A/B | 最高 |
-| 分散式系統調校 | CPU 多節點 collective、網路與儲存路徑、單卡資料供給、擴展模型與限制 | 高 |
+| 分散式系統調校 | PyTorch 多程序正確性、DDP／FSDP／NCCL 資料路徑、跨節點網路與儲存、單卡工作放置及多卡待驗證設計 | 高 |
 | Linux、C/C++、Python、系統架構 | Python 量測平台、C++/CUDA 微基準、CPU/PCIe/記憶體／網路分析 | 高 |
 
 ## 加分條件如何變成證據
@@ -24,7 +24,7 @@
 |---|---|---|
 | Linux 系統效能分析 | 在 ML/LLM 報告中附 `perf stat`／`pidstat`／`iostat` 等可用指標，定位 CPU、I/O 或排程等待；結合 GPU trace 解釋端到端瓶頸。受權限限制的計數器需標示不可用。[Linux workload tracing](https://docs.kernel.org/admin-guide/workload-tracing.html) | 01、04–06 |
 | GPU、ML frameworks、LLM | PyTorch 訓練 loop、Profiler、CUDA/Nsight trace、真實模型微調和三輪受控調校；交付的不是框架教學，而是效能判斷 | 03–06 |
-| 分散式系統、網路協定 | Gloo/MPI 訊息大小掃描；用 `ss -ti`、NIC 統計與封包擷取核對 TCP RTT、retransmit、吞吐、MTU 和 CPU 開銷，解釋 collective 與資料供給的曲線 | 07–08 |
+| 分散式系統、網路協定 | 用 `ss -ti`、NIC 統計與封包擷取核對 TCP RTT、retransmit、吞吐、MTU 和 CPU 開銷；Gloo 小型實作驗證 PyTorch rank／collective 語意，另分析 DDP／FSDP／NCCL 的多卡資料路徑 | 07–08 |
 | RDMA | 先做一份 **TCP 與 RDMA 資料路徑設計／診斷報告**：記憶體註冊、queue pair、completion、RoCE/InfiniBand 的前提、PFC/ECN/CNP 與錯誤計數器；寫出若有 RDMA NIC 時會如何用 `ibv_devinfo`、`rping`／perftest 和 NIC counters 驗證。只有取得相容硬體時才新增實測，明確區分設計與量測。[NCCL 網路疑難排解](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/troubleshooting/networking_troubleshooting.html) | 10；實測條件式 |
 | 雲端運算 | 用一份可重現的 VM／容器環境規格或 IaC 部署單 GPU 實驗，記錄機型、映像、磁碟、驅動、網路、開關機流程、每次 GPU 小時及成本；換新機後能重跑基準。若使用本地 GPU，也要提供雲端部署設計與成本估算，標成未部署 | 11 |
 | 資料庫 | `perfctl` 以 SQLite 建立 run／environment／metric 索引；JSONL 保留原始數據。以實際查詢比較索引前後的 `EXPLAIN QUERY PLAN` 和查詢時間，記錄 WAL 與備份策略。SQLite WAL 不適合跨主機共享資料庫，跨節點寫入由單一收集器集中處理。[SQLite query plan](https://www.sqlite.org/eqp.html)、[SQLite WAL](https://www.sqlite.org/wal.html) | 02 |
@@ -77,13 +77,13 @@
 
 把「可真正測到」和「可推估但未驗證」分開：
 
-- **真實多節點通訊**：兩台普通 Linux CPU 主機即可用 PyTorch Gloo 或 MPI 做 `all_reduce`、broadcast 的大小掃描，量測啟動成本、延遲、有效頻寬、CPU 使用率和網路流量。只有一台主機時先做多 process 功能版，再等第二台補多節點數據。PyTorch 建議 CPU 分散式工作使用 Gloo。[PyTorch 分散式文件](https://docs.pytorch.org/docs/stable/distributed.html)
+- **PyTorch 分散式語意**：兩個 CPU process 以 Gloo 驗證 rank、rendezvous、`all_reduce` 和 broadcast；有第二台主機時再驗證跨節點啟動。既有 MPI 經驗足以支撐通訊基礎，網路性能在模組 07 獨立量測，無須重做大型 CPU collective benchmark。[PyTorch 分散式文件](https://docs.pytorch.org/docs/stable/distributed.html)
 - **單 GPU 的遠端資料路徑**：固定同一訓練工作，對照本機資料、遠端檔案／物件儲存或網路串流；觀察資料等待、GPU idle、吞吐、page cache 與網路使用。只有確有遠端來源時才做；不能用本機迴圈連線冒充跨節點網路。
-- **擴展模型**：以實測的單卡 compute 時間、CPU collective 延遲和資料路徑數據，建立簡單的 compute/communication 時間模型，列出假設與敏感度。它是設計練習，**不是**多 GPU scaling 結果。
+- **多 GPU 訓練架構**：以單卡訓練 trace 和模型參數量，標示 DDP 梯度同步、FSDP 參數 all-gather／梯度 reduce-scatter 的資料路徑及顯存取捨；列出 NCCL、GPU 拓撲和多卡實測時要收的指標。CPU 通訊時間不拿來預測 NCCL 擴展率。[PyTorch DDP](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html)、[PyTorch FSDP2](https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html)
 
 若環境有 Slurm，加入作業放置、CPU affinity、資源配額與共享檔案系統的比較；沒有 Slurm，核心實驗仍可完成。RDMA、NCCL、多 GPU DDP、NVLink 或 GPU Direct 必須有相應硬體才能宣稱實測。尤其不能讓兩個 NCCL rank 共用一張 GPU 假裝做雙卡 benchmark；PyTorch 文件要求多 process 使用 NCCL 時每個 process 獨占其 GPU。[PyTorch 分散式文件](https://docs.pytorch.org/docs/stable/distributed.html)
 
-**作品結果**：訊息大小對延遲／有效頻寬曲線、訓練資料位置對 GPU 等待和 tokens/s 的比較（若有遠端來源）、一份標明已測／推估／未測的調校建議。
+**作品結果**：真實 TCP 網路的延遲／吞吐資料、Gloo rank 正確性案例、DDP／FSDP 資料移動與記憶體圖、訓練資料位置對 GPU 等待和 tokens/s 的比較（若有遠端來源），以及多 GPU 待驗證量測設計。
 
 ## 作品 5：系統與 C++／CUDA 深度證據（模組 03）
 

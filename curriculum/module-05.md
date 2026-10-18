@@ -16,7 +16,7 @@ decoder-only 模型的 attention、MLP、tokenization、padding、序列長度�
 
 1. 做可設定層數、hidden size、序列長度的小型 decoder-only 模型；用固定 token 資料跑前向、反向和 optimizer，驗證 loss 有限、梯度非空、參數確實更新。
 2. 選單卡能承受、授權清楚的開源預訓練 causal LM 與固定資料集；記錄 checkpoint revision、tokenizer、資料版本。依顯存選 full fine-tuning 或 LoRA，不能把 LoRA 當全參數結果。[PEFT LoRA](https://huggingface.co/docs/peft/main/package_reference/lora)
-3. 用模組 02 平台量測 non-padding training tokens/s、step 延遲、峰值已分配／保留顯存、optimizer 更新率、loss 與錯誤。記錄 microbatch × accumulation 的有效 batch 與序列長度分布。
+3. 用模組 02 平台量測 non-padding training tokens/s、step 延遲、峰值已分配／保留顯存、optimizer 更新率、訓練 loss、固定驗證集 loss／品質指標與錯誤。記錄 microbatch × accumulation 的有效 batch、序列長度分布及實際訓練 token 數；短跑性能基準不能直接代表收斂速度。
 4. 用 Profiler 分開資料、前向、反向、optimizer；保存可開啟 trace，找出下一模組的調校題目。
 
 ## 做完留下的成果

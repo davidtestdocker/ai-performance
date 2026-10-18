@@ -62,11 +62,13 @@
 - **MTU 與虛擬化**：MTU 不一致、封包分段、共享雲端網路與主機 CPU 都可能影響結果。單機 loopback 不經過實際 NIC，不能當跨節點基準。
 
 
-## 08 分散式 collective
+## 08 分散式訓練機制
 
 - **rank 與同步**：rank 是程序身分；`all_reduce` 合併所有 rank 的數值並把結果分發。每個 rank 需要驗證相同最終值，還要看它們是否真的在不同主機上。[PyTorch 分散式文件](https://docs.pytorch.org/docs/stable/distributed.html)
-- **通訊／運算比**：同步頻率高、每次計算少時，通訊或等待占比高。只有保持等效工作量，才能比較不同同步策略的整體效果。
-- **CPU Gloo 與 GPU NCCL**：可用 CPU 多節點學會 API、rank 與網路診斷，卻不能據此聲稱 GPU 多節點擴展率。擴展模型只做有假設的預測。
+- **DDP 與 FSDP**：DDP 在各 rank 保存模型副本並同步梯度；FSDP 切分參數、梯度和 optimizer state，在前向／反向期間 all-gather 所需參數，反向後 reduce-scatter 梯度。比較兩者要看每卡記憶體、通訊量、同步點及能否與計算重疊。[PyTorch DDP](https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html)、[PyTorch FSDP2](https://docs.pytorch.org/tutorials/intermediate/FSDP_tutorial.html)
+- **其他模型並行**：張量並行切分單層計算，流水線並行把層分到不同裝置；選擇取決於模型能否放進單卡、裝置間連線和負載形狀。單 GPU 學資料切分與通訊時機，不能實測兩者擴展率。[PyTorch 張量並行](https://docs.pytorch.org/tutorials/intermediate/TP_tutorial.html)、[PyTorch 流水線並行](https://docs.pytorch.org/tutorials/intermediate/pipelining_tutorial.html)
+- **CPU Gloo 與 GPU NCCL**：少量 CPU Gloo 實作能學 process group、rank、rendezvous 和 collective 正確性；它的延遲與頻寬不能代入 NCCL。PCIe／NVLink、跨節點網路、RDMA 與 GPU 拓撲會改變通訊路徑。只有實際多 GPU 才能量測擴展率。[NCCL 總覽](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html)
+- **工作配置與訓練執行**：Slurm 分配節點、CPU 和 GPU，`torchrun` 啟動 PyTorch process；兩者可一起使用。分析 Slurm 工作時要分開佇列等待、啟動和穩態 step。GPU GRES 與 CPU binding 可能改變工作實際看到的資源，但仍需量測才能說有性能影響。[Slurm GRES](https://slurm.schedmd.com/gres.html)、[CPU 管理](https://slurm.schedmd.com/cpu_management.html)
 
 
 ## 09 伺服器與儲存

@@ -14,7 +14,7 @@
 
 ## 實作順序
 
-1. 定義 YAML 工作矩陣與輸出 schema：命令、參數、環境、開始／結束時間、退出碼、每個 step、錯誤和資源指標。
+1. 定義 YAML 工作矩陣與輸出 schema：命令、參數、環境、模型／資料版本、開始／結束時間、退出碼、每個 step、loss／品質指標、錯誤和資源指標。若只量固定步數吞吐，明確標示它不同於訓練到目標品質的時間；參照 MLPerf Training 的公平比較與資訊揭露方法，但不宣稱正式 MLPerf 成績。[MLCommons Training](https://mlcommons.org/benchmarks/training/)
 2. 用 Python 實作預檢、逾時、暖機、重複執行與中斷後保留資料。先在 CPU 跑，再接 GPU；所有執行輸出 JSONL。
 3. 加入比較器：只比較相同硬體、模型、資料、精度和有效 batch；報中位數、分散度、樣本數、失敗率及差異。P95 需有足夠的逐步樣本。
 4. 用 SQLite 索引 run、environment、metric；比較有無 index 的真實查詢與 `EXPLAIN QUERY PLAN`。跨主機資料由單一收集器匯入，SQLite WAL 不放網路檔案系統上。[SQLite 查詢計畫](https://www.sqlite.org/eqp.html)
