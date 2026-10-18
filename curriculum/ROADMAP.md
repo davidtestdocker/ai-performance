@@ -2,20 +2,20 @@
 
 [作品設計](../README.md)｜[技術觀念講義](CONCEPTS.md)｜[作品成果對照](OUTCOMES.md)。依能力相依順序學習，沒有週數、截止日或指令數上限。下列模組數量來自不同的實驗問題與作品成果，帶練時若一個模組太大或前置知識不足，可以再拆。每個模組以「理解觀念 → 寫程式 → 做實驗 → 分析結果 → 留下作品」推進。
 
-| 模組 | 要解決的問題 | 作品結果 | 對應職缺 |
-|---|---|---|---|
-| [01 Linux 與量測方法](module-01.md) | 看到的慢是 CPU、記憶體、I/O、GPU，還是量測錯誤？ | 正確計時、環境快照、瓶頸假設與反證 | Linux 效能、系統架構 |
-| [02 測試自動化與數據](module-02.md) | 如何批量重跑並可靠比較？ | `perfctl`、失敗處理、JSONL/SQLite、統計報告 | Python、自動化、資料分析、資料庫 |
-| [03 GPU 與 C++/CUDA](module-03.md) | kernel、記憶體傳輸和資料布局如何影響性能？ | 正確性可核對的 microbenchmark 與 profile | GPU、C/C++、系統架構 |
-| [04 ML 訓練管線](module-04.md) | GPU 為何等待資料或算子？ | 真實資料集訓練與兩輪有證據的調校 | ML frameworks、Linux、儲存 |
-| [05 LLM 訓練基礎](module-05.md) | 訓練 step 的時間與記憶體去哪裡？ | 可控模型與真實模型微調基準 | LLM、GPU、ML |
-| [06 LLM 訓練調校](module-06.md) | 何種設定改善吞吐，代價是什麼？ | 三輪 A/B、profiler trace、顯存／速度取捨 | LLM 訓練效能分析 |
-| [07 TCP 網路效能](module-07.md) | 慢是 RTT、重傳、頻寬還是 CPU？ | 兩主機 TCP 指標、封包與吞吐曲線 | 網路協定、Linux |
-| [08 分散式 collective](module-08.md) | rank 間同步成本如何影響工作？ | Gloo/MPI 正確性、跨節點量測、擴展模型 | 分散式系統 |
-| [09 伺服器與儲存](module-09.md) | 資料讀取與 checkpoint 如何拖慢訓練？ | 本機／遠端路徑、page cache、I/O stall 證據 | 伺服器、儲存系統 |
-| [10 RDMA 架構與診斷](module-10.md) | TCP 結論哪些不能外推到 RDMA？ | 資料路徑與診斷報告；有硬體才加實測 | RDMA、網路協定 |
-| [11 雲端重現](module-11.md) | 換一台機器能否重跑結果？ | GPU 環境部署、版本、成本和複測 | 雲端運算 |
-| [12 開源貢獻與作品記錄](module-12.md) | 別人能否重現並使用成果？ | 上游貢獻、證據索引、專案文件 | 開源、合作溝通 |
+| 模組 | 要解決的問題 | 作品結果 | 對應職缺 | 使用技術 |
+|---|---|---|---|---|
+| [01 Linux 與量測方法](module-01.md) | 看到的慢是 CPU、記憶體、I/O、GPU，還是量測錯誤？ | 正確計時、環境快照、瓶頸假設與反證 | Linux 效能、系統架構 | `lscpu`、`vmstat`、`pidstat`、`iostat`、`perf stat`、CUDA Event |
+| [02 測試自動化與數據](module-02.md) | 如何批量重跑並可靠比較？ | `perfctl`、失敗處理、JSONL/SQLite、統計報告 | Python、自動化、資料分析、資料庫 | Python CLI、YAML、JSONL、CSV、SQLite、`EXPLAIN QUERY PLAN` |
+| [03 GPU 與 C++/CUDA](module-03.md) | kernel、記憶體傳輸和資料布局如何影響性能？ | 正確性可核對的 microbenchmark 與 profile | GPU、C/C++、系統架構 | C++、CUDA C++、CUDA Event、Nsight Compute |
+| [04 ML 訓練管線](module-04.md) | GPU 為何等待資料或算子？ | 真實資料集訓練與兩輪有證據的調校 | ML frameworks、Linux、儲存 | PyTorch `Dataset`／`DataLoader`／Profiler、Nsight Systems、`iostat` |
+| [05 LLM 訓練基礎](module-05.md) | 訓練 step 的時間與記憶體去哪裡？ | 可控模型與真實模型微調基準 | LLM、GPU、ML | PyTorch、Transformers、tokenizer、PEFT/LoRA、CUDA |
+| [06 LLM 訓練調校](module-06.md) | 何種設定改善吞吐，代價是什麼？ | 三輪 A/B、profiler trace、顯存／速度取捨 | LLM 訓練效能分析 | PyTorch Profiler、AMP、SDPA、activation checkpointing |
+| [07 TCP 網路效能](module-07.md) | 慢是 RTT、重傳、頻寬還是 CPU？ | 兩主機 TCP 指標、封包與吞吐曲線 | 網路協定、Linux | TCP、`ip`、`ss`、`ethtool`、`iperf3`、`tcpdump`（權限允許時） |
+| [08 分散式 collective](module-08.md) | rank 間同步成本如何影響工作？ | Gloo/MPI 正確性、跨節點量測、擴展模型 | 分散式系統 | PyTorch `torch.distributed`／Gloo、MPI、`all_reduce`、broadcast |
+| [09 伺服器與儲存](module-09.md) | 資料讀取與 checkpoint 如何拖慢訓練？ | 本機／遠端路徑、page cache、I/O stall 證據 | 伺服器、儲存系統 | Linux 檔案系統、page cache、`iostat`、PyTorch checkpoint、本機／遠端儲存 |
+| [10 RDMA 架構與診斷](module-10.md) | TCP 結論哪些不能外推到 RDMA？ | 資料路徑與診斷報告；有硬體才加實測 | RDMA、網路協定 | RDMA verbs、RoCE／InfiniBand、`rdma link`、`ibv_devinfo`、`rping`／perftest（有硬體時） |
+| [11 雲端重現](module-11.md) | 換一台機器能否重跑結果？ | GPU 環境部署、版本、成本和複測 | 雲端運算 | Linux VM、容器、GPU driver／CUDA runtime、PyTorch、IaC（採用時） |
+| [12 開源貢獻與作品記錄](module-12.md) | 別人能否重現並使用成果？ | 上游貢獻、證據索引、專案文件 | 開源、合作溝通 | Git、上游 issue／PR、Markdown、版本固定與校驗值 |
 
 ## 帶練方式
 
