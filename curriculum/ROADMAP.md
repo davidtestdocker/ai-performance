@@ -1,6 +1,6 @@
 # HPC AI 效能工程：模組學習路線
 
-[作品設計](../README.md)｜[工具選型分析](TOOL_SELECTION.md)｜[技術觀念講義](CONCEPTS.md)｜[作品成果對照](OUTCOMES.md)。依能力相依順序學習，沒有週數、截止日或指令數上限。下列模組數量來自不同的實驗問題與作品成果，帶練時若一個模組太大或前置知識不足，可以再拆。每個模組以「理解觀念 → 寫程式 → 做實驗 → 分析結果 → 留下作品」推進。
+[作品設計](../README.md)｜[現有機器安排](INFRASTRUCTURE.md)｜[工具選型分析](TOOL_SELECTION.md)｜[技術觀念講義](CONCEPTS.md)｜[作品成果對照](OUTCOMES.md)。依能力相依順序學習，沒有週數、截止日或指令數上限。下列模組數量來自不同的實驗問題與作品成果，帶練時若一個模組太大或前置知識不足，可以再拆。每個模組以「理解觀念 → 寫程式 → 做實驗 → 分析結果 → 留下作品」推進。
 
 | 模組 | 要解決的問題 | 作品結果 | 對應職缺 | 使用技術 |
 |---|---|---|---|---|
@@ -14,7 +14,7 @@
 | [08 分散式訓練機制](module-08.md) | rank 同步、DDP／FSDP 資料移動與工作放置如何影響效能？ | Gloo 最小正確性實作、DDP／FSDP／NCCL 路徑圖、多卡故障診斷與待驗證設計；有 Slurm 時加資源與工作內時間分析 | 分散式系統 | `torchrun`、PyTorch `torch.distributed`／Gloo、DDP／FSDP、張量／流水線並行機制、NCCL 診斷；Slurm `sbatch`／`srun`／GRES（可用時） |
 | [09 伺服器與儲存](module-09.md) | 資料讀取與 checkpoint 如何拖慢訓練？ | 本機／遠端路徑、page cache、I/O stall 證據 | 伺服器、儲存系統 | Linux 檔案系統、page cache、`iostat`、PyTorch checkpoint、本機／遠端儲存 |
 | [10 RDMA 架構與診斷](module-10.md) | TCP 結論哪些不能外推到 RDMA？ | 資料路徑與診斷報告；有硬體才加實測 | RDMA、網路協定 | RDMA verbs、RoCE／InfiniBand、`rdma link`、`ibv_devinfo`、`rping`／perftest（有硬體時） |
-| [11 雲端重現](module-11.md) | 換一台機器能否重跑結果？ | GPU 環境部署、版本、成本和複測 | 雲端運算 | Linux VM、容器、GPU driver／CUDA runtime、PyTorch、IaC（採用時） |
+| [11 雲端重現](module-11.md) | 換一個乾淨環境能否重跑結果？ | 現有 GPU VM 的乾淨容器複測、版本與成本；新 VM 供給條件式驗證 | 雲端運算 | Linux VM、容器、GPU driver／CUDA runtime、PyTorch、IaC（採用時） |
 | [12 開源貢獻與作品記錄](module-12.md) | 別人能否重現並使用成果？ | 上游貢獻、證據索引、專案文件 | 開源、合作溝通 | Git、上游 issue／PR、Markdown、版本固定與校驗值 |
 
 Slurm 在本路線作為 HPC 工作分配與放置的具體平台；沿用可用的叢集執行效能實驗，不再重建一套叢集。Ray 是有動態 Python 分散式工作流或團隊使用時的延伸，**不列為這份職缺的通用必修**。選型理由與單 GPU 邊界見[工具選型分析](TOOL_SELECTION.md)。

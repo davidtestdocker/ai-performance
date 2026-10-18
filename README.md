@@ -2,7 +2,7 @@
 
 這份規劃直接對應職缺的四項工作：**測試自動化與數據分析、機器學習效能分析、LLM 訓練效能分析、分散式系統軟硬體調校**。唯一硬體限制是最多一張 GPU。作品主角是效能工程方法與可重現的診斷；本機或雲端 Linux 單卡皆可完成核心作品。已有叢集可以用作實驗環境，但不決定作品題目。
 
-依[模組學習路線](curriculum/ROADMAP.md)、[工具選型分析](curriculum/TOOL_SELECTION.md)、[技術觀念講義](curriculum/CONCEPTS.md)與[作品成果對照](curriculum/OUTCOMES.md)進行，實際結果記在[學習進度](PROGRESS.md)：每個模組學觀念、寫程式、做實驗、分析結果，再把實際成果接到下一個模組。**不設定週數或每日進度。**下方是最終作品設計，各模組文件是實作入口。
+依[模組學習路線](curriculum/ROADMAP.md)、[現有機器安排](curriculum/INFRASTRUCTURE.md)、[工具選型分析](curriculum/TOOL_SELECTION.md)、[技術觀念講義](curriculum/CONCEPTS.md)與[作品成果對照](curriculum/OUTCOMES.md)進行，實際結果記在[學習進度](PROGRESS.md)：每個模組學觀念、寫程式、做實驗、分析結果，再把實際成果接到下一個模組。**不設定週數或每日進度。**下方是最終作品設計，各模組文件是實作入口。
 
 ## 最終成果
 
@@ -26,7 +26,7 @@
 | GPU、ML frameworks、LLM | PyTorch 訓練 loop、Profiler、CUDA/Nsight trace、真實模型微調和三輪受控調校；交付的不是框架教學，而是效能判斷 | 03–06 |
 | 分散式系統、網路協定 | 用 `ss -ti`、NIC 統計與封包擷取核對 TCP RTT、retransmit、吞吐、MTU 和 CPU 開銷；Gloo 小型實作驗證 PyTorch rank／collective 語意，另分析 DDP／FSDP／NCCL 的多卡資料路徑 | 07–08 |
 | RDMA | 先做一份 **TCP 與 RDMA 資料路徑設計／診斷報告**：記憶體註冊、queue pair、completion、RoCE/InfiniBand 的前提、PFC/ECN/CNP 與錯誤計數器；寫出若有 RDMA NIC 時會如何用 `ibv_devinfo`、`rping`／perftest 和 NIC counters 驗證。只有取得相容硬體時才新增實測，明確區分設計與量測。[NCCL 網路疑難排解](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/troubleshooting/networking_troubleshooting.html) | 10；實測條件式 |
-| 雲端運算 | 用一份可重現的 VM／容器環境規格或 IaC 部署單 GPU 實驗，記錄機型、映像、磁碟、驅動、網路、開關機流程、每次 GPU 小時及成本；換新機後能重跑基準。若使用本地 GPU，也要提供雲端部署設計與成本估算，標成未部署 | 11 |
+| 雲端運算 | 用可重現的 VM／容器環境規格或 IaC 部署單 GPU 實驗，記錄機型、映像、磁碟、驅動、網路、開關機流程、每次 GPU 小時及成本；先在現有 GPU VM 的乾淨環境複測，新 VM 從零供給列條件式實測。若使用本地 GPU，也要提供雲端部署設計與成本估算，標成未部署 | 11 |
 | 資料庫 | `perfctl` 以 SQLite 建立 run／environment／metric 索引；JSONL 保留原始數據。以實際查詢比較索引前後的 `EXPLAIN QUERY PLAN` 和查詢時間，記錄 WAL 與備份策略。SQLite WAL 不適合跨主機共享資料庫，跨節點寫入由單一收集器集中處理。[SQLite query plan](https://www.sqlite.org/eqp.html)、[SQLite WAL](https://www.sqlite.org/wal.html) | 02 |
 | 伺服器或儲存系統 | 比較本機磁碟、遠端資料及 checkpoint 寫入對訓練 stall 的影響；記錄 `iostat`、實際讀寫量、page cache、檔案系統、磁碟型號與容量。若有遠端儲存，測一致的資料集與冷／熱 cache 條件 | 09 |
 | 開源社群貢獻 | 在用到的上游專案提出一個可重現 issue、文件修正、benchmark bug fix 或小型 PR，附最小重現、版本與前後證據；倉庫連結 issue/PR 與審查狀態。**提交**可自行完成，合併與否取決於維護者，不能預先宣稱 | 12 |
