@@ -2,8 +2,8 @@
 
 課綱版本：v1.0（2026-10-19）。全部重新開始；本次文件建立不等於學員完成實驗。
 
-- 目前位置：W01D01，微步驟 1，尚未開始。
-- 下一步：在已確認的 Linux CPU VM 執行 `lscpu`，回傳完整輸出後再判讀。
+- 目前位置：W01D01，微步驟 2，進行中。
+- 下一步：在同一台 Linux CPU VM 執行 `cat /proc/cpuinfo`，回傳完整輸出後判讀；微步驟 1 已完成驗收。
 - 已通過：0 / 120 日。
 - 已有設備：僅確認 Google Cloud GPU quota 最多一張；實際機型、可用 CPU VM、版本、RDMA 支援待盤點。
 - RDMA / 多 GPU 硬體實測：選修、未測，不阻擋必修完成。
@@ -12,7 +12,7 @@
 
 | 日 | 狀態 | 證據路徑／commit | 驗收日期與待補強 |
 |---|---|---|---|
-| [W01D01](curriculum/weeks/week-01/day-01/README.md) | 未開始 | — | — |
+| [W01D01](curriculum/weeks/week-01/day-01/README.md) | 進行中 | [微步驟 1 實作與驗收](evidence/week-01/day-01/README.md) | 微步驟 1：2026-10-19 通過；整日待驗收 |
 | [W01D02](curriculum/weeks/week-01/day-02/README.md) | 未開始 | — | — |
 | [W01D03](curriculum/weeks/week-01/day-03/README.md) | 未開始 | — | — |
 | [W01D04](curriculum/weeks/week-01/day-04/README.md) | 未開始 | — | — |
