@@ -1,30 +1,36 @@
-# 九階段課綱與依賴
+# 固定課綱 v1.0：24 週 × 每週 5 日
 
-[首頁](../README.md)｜[進度](../PROGRESS.md)｜[帶練方式](TEACHING.md)
+核定日期：2026-10-19。唯一正式基準為本儲存庫 main 的本文件與各日 README。週次是學習順序，不是硬性日曆期限；未通過可延長練習，不得擅自移動、刪除或換掉週目標。
 
-從階段 00 開始；先通過正確性與理解驗收，再擴大實驗。每個階段內的條目是多次教學的順序，不是一次要求執行的作業包。
+Python、C/C++、CUDA、PyTorch、ML、LLM 一律從零實作。只略過一般 Linux 操作入門，直接從系統效能與架構開始。閱讀舊聊天或舊程式不構成能力驗證。
 
-| 階段 | 問題 | 前置 | 驗收 |
+| 週 | 固定目標 | 設備 | 必交成果 |
 |---|---|---|---|
-| [00 可信量測與系統觀察](stage-00.md) | 看到程式很忙，如何知道數字量對了，以及 CPU、等待和資料移動各占多少？ | 無；從此階段重新開始 | 能重跑 CPU 正確性與計時對照；有同次執行的負載輸出和程序指標；GPU 量測清楚分開端到端與裝置時間。 |
-| [01 從零理解一次訓練](stage-01.md) | 如何證明程式真的在學習，而不是只做預測或印出 loss？ | 階段 00 的 CPU 量測與環境確認 | 可逐段解釋自己寫的 loop；有非空且有限的梯度、參數更新與小資料學習證據；計時不包含不明確的工作。 |
-| [02 逐步建立 Python 量測工具](stage-02.md) | 如何可靠重跑同一工作並比較，讓失敗不會變成虛假的加速？ | 階段 01 已有可正確重跑的訓練程式 | 同規格一條命令重跑；從 JSONL 獨立重算摘要；失敗、逾時和環境不符可見；不以單次最快值報提升。 |
-| [03 ML 訓練管線瓶頸診斷](stage-03.md) | GPU 等待時，問題究竟在資料讀取、CPU 處理、傳輸，還是 GPU 運算？ | 階段 02；階段 01 的訓練機制 | 一份可開啟 timeline、時間分解、兩輪有預測與原始資料的 A/B；能說明接受或放棄調整的理由。 |
-| [04 C／C++ 與 CUDA 資料移動](stage-04.md) | 底層資料布局與傳輸如何限制端到端訓練？ | 階段 00 與 03；已看過一份訓練 trace | C／C++ 程式可自行修改與解釋；CPU／GPU 逐元素相符；有分段時間、頻寬曲線和受控實驗。 |
-| [05 LLM 真正訓練與可信基準](stage-05.md) | 如何量出一張 GPU 的 LLM 訓練能力，並證明數字不是推論或 padding 灌水？ | 階段 02、03；運用階段 04 的資料移動觀念 | 可控小模型與真實模型都有有效訓練證據；token 計數口徑清楚；模型、資料、batch、精度、版本與顯存可追溯。 |
-| [06 LLM 訓練效能調校](stage-06.md) | 怎樣提升吞吐或降低顯存，並說清楚代價及適用範圍？ | 階段 05 的正確性、基準與 trace | 三份假設、控制變因、trace、原始數據、品質與結論完整的報告；說清最佳已測設定及瓶頸是否轉移，不要求提升百分比。 |
-| [07 分散式系統、儲存與 RDMA](stage-07.md) | 工作變慢時，怎樣區分資源放置、資料路徑、慢 rank 和通訊限制？ | 階段 03、05；訓練基準已穩定 | 單卡系統調校案例、真實雙主機 TCP、Gloo／DDP 正確性、多卡資料路徑及 RDMA 診斷方案；每項明示已測或需設備。 |
-| [08 乾淨重現與面試交付](stage-08.md) | 如何讓別人重跑，並在追問下說清楚自己做了什麼？ | 階段 00–07 的實際證據；設備限制項可保留待測 | 四個成果入口、乾淨重跑證據、中文與英文講解；可追溯履歷敘述，並清楚說明單卡邊界。 |
+| [01 Linux 系統效能與 CPU 架構](weeks/week-01/README.md) | 建立 CPU、記憶體、程序與量測基線，能區分忙碌與等待。 | 一台 Linux CPU VM | 主機盤點、三種負載觀察表與基線報告 |
+| [02 Python 從零與可重現紀錄](weeks/week-02/README.md) | 親手建立變數、流程、函式、檔案與錯誤處理能力。 | 一台 Linux CPU VM | 可讀寫 JSON/CSV 的小型實驗紀錄程式 |
+| [03 自動化效能測試與數據分析](weeks/week-03/README.md) | 建立重複、錯誤分類、統計與可重現圖表的測試工具。 | 一台 Linux CPU VM | benchmark runner、原始 CSV、摘要圖與回歸規則 |
+| [04 C 從零與記憶體正確性](weeks/week-04/README.md) | 從編譯、型別、指標開始親寫可驗證的 CPU kernel。 | 一台 Linux CPU VM；GCC/Clang | 具邊界測試與 sanitizer 紀錄的向量加法 |
+| [05 C++ 從零與 CPU 記憶體效能](weeks/week-05/README.md) | 建立 C++ 資源管理並用工作集、SIMD 與 cache 解釋 CPU 效能。 | 一台 Linux CPU VM；perf 權限依環境 | C++ 基準與 cache/SIMD 分析報告 |
+| [06 CPU 平行化、NUMA 與測試整合](weeks/week-06/README.md) | 量測單機 CPU 平行效率並用證據分辨運算與記憶體限制。 | 一台多 vCPU Linux VM；NUMA 不存在則做設計分析 | OpenMP 擴展曲線與 CPU 自動化成果 |
+| [07 GPU 架構與 CUDA 從零](weeks/week-07/README.md) | 親寫第一個 CUDA kernel，理解執行模型、記憶體與同步。 | 一張 NVIDIA GPU | 含 CPU reference 與錯誤處理的 CUDA 向量加法 |
+| [08 CUDA 記憶體與 kernel 調校](weeks/week-08/README.md) | 以正確性與量測支持 coalescing、shared memory 與 reduction 設計。 | 一張 NVIDIA GPU | 三個 CUDA A/B 實驗與可重現基準 |
+| [09 Nsight 與 GPU 瓶頸診斷](weeks/week-09/README.md) | 以 timeline 和 kernel 指標區分傳輸、啟動、頻寬與計算限制。 | 一張 NVIDIA GPU；計數器權限依環境 | Nsight 診斷報告與一個受控調整 |
+| [10 數學、NumPy 與 ML 從零](weeks/week-10/README.md) | 親手完成預測、loss、梯度與更新，不預設機器學習基礎。 | 一台 CPU VM | NumPy 線性模型與梯度檢查 |
+| [11 PyTorch 與神經網路從零](weeks/week-11/README.md) | 親寫 tensor、autograd、Module 與完整訓練/驗證流程。 | CPU 起步，再使用單 GPU | 可在 CPU/GPU 訓練的 MLP 與 checkpoint |
+| [12 ML 訓練效能 Profiling](weeks/week-12/README.md) | 拆解資料、搬移、forward/backward 與 optimizer 的成本。 | 一張 NVIDIA GPU | ML 基準、PyTorch trace 與瓶頸分析 |
+| [13 ML 精度、記憶體與調校](weeks/week-13/README.md) | 以品質約束比較 AMP、累積與編譯，完成 ML 效能成果。 | 一張 GPU | 兩輪受控調校與 ML 完整報告 |
+| [14 LLM 基礎與 Attention 實作](weeks/week-14/README.md) | 從 token 與機率開始親寫 causal attention，不預設 NLP 知識。 | CPU 起步，單 GPU 驗證 | tokenizer、小型 attention 與形狀測試 |
+| [15 從零訓練小型 GPT](weeks/week-15/README.md) | 組裝 decoder Transformer 並完成真正的 next-token 訓練。 | 一張 GPU；小模型依顯存縮放 | 可恢復訓練的小型 GPT 與學習曲線 |
+| [16 LLM 訓練 Profiling 與記憶體模型](weeks/week-16/README.md) | 量化 attention、MLP、optimizer、資料與 checkpoint 成本。 | 一張 GPU | LLM 基線與記憶體/時間分解報告 |
+| [17 LLM 單卡調校與標準模型](weeks/week-17/README.md) | 比較 SDPA、activation checkpointing 與累積，轉移到標準 Transformer 實作。 | 一張 GPU，模型須在現有顯存內 | 三份 LLM 調校實驗與標準模型訓練驗證 |
+| [18 跨節點 TCP 與網路效能](weeks/week-18/README.md) | 在兩台不同 CPU VM 建立可信網路基線與瓶頸診斷。 | 兩台不同 Linux CPU VM，同 zone 私有網路優先 | 雙主機 TCP 吞吐/延遲與系統觀察報告 |
+| [19 MPI 跨節點平行計算](weeks/week-19/README.md) | 親寫 MPI 通訊與歸約並在兩台 CPU VM 驗證正確性和擴展。 | 兩台不同 CPU VM；Open MPI | 跨節點 MPI 程式、通訊曲線與擴展報告 |
+| [20 Slurm 真實跨節點排程](weeks/week-20/README.md) | 建立或驗證最小兩節點 Slurm，能提交、綁定與診斷工作。 | 兩台 CPU worker VM；controller 可共用其中一台 | Slurm 作業、MPI 整合與失敗診斷紀錄 |
+| [21 CPU Gloo 與跨節點 DDP](weeks/week-21/README.md) | 從 process group 到真實雙節點訓練，驗證梯度同步與資料切分。 | 兩台 CPU VM；PyTorch CPU/Gloo | 跨節點 DDP 正確性、吞吐與除錯報告 |
+| [22 分散式系統與儲存調校](weeks/week-22/README.md) | 結合 CPU、網路、儲存與排程指標診斷真實工作。 | 兩台 CPU VM；單 GPU 可分時使用 | 兩個系統調校案例與診斷決策表 |
+| [23 RDMA、NCCL 與多卡診斷設計](weeks/week-23/README.md) | 掌握必要原理與診斷流程，明確區分設計、模擬和硬體實測。 | CPU VM 做盤點；多 GPU/RDMA 實測皆選修 | RDMA/NCCL 原理問答、拓樸圖與補測計畫 |
+| [24 四大成果整合與面試驗收](weeks/week-24/README.md) | 獨立重現四大能力成果，識別缺口並能處理陌生變化。 | 既有 CPU VM 與一張 GPU，按需分時 | 四份成果報告、重現入口與能力邊界清單 |
 
-## 共通量測門檻
+## 變更規則
 
-- 先有答案、梯度或參數更新的驗證，再分析速度；loss 有限本身不足以證明正確。
-- 固定硬體、工作負載、資料、精度與有效 batch 作同條件比較；精度或工作量改變時另列取捨實驗。
-- 暖機與正式量測分開；GPU 非同步須用適合範圍的同步或 CUDA event；端到端與 kernel 時間分開。
-- 從五次獨立 run 起步，揭露分散程度與失敗率；不穩定就查環境或增加樣本。逐步樣本不當成獨立 run。P95 若使用需揭露足夠樣本與不確定性，不因固定樣本數就宣稱可靠。
-- Profiler 用於定位，主要速度用無 profiler 的量測；診斷後重看瓶頸是否轉移。
-- 不要求正向提升，不刻意湊失敗；可驗收無效或不確定結果，但要有支持判斷的證據。
-
-## 延伸項目
-
-SQLite 索引／WAL 深度、上游投稿、Ray、推論服務、重新部署 Kubernetes／OpenStack 均依實際需要選修，不作核心階段的先決條件。多 GPU／RDMA 實測為設備條件式驗收。
+改週目標、順序或必修範圍前，先提出具體 diff、職缺理由及影響，取得使用者明確同意再提交。修錯字、補說明或相容命令可直接修正，但不能藉此換課。24 週是固定課程結構；延長某日練習不改週次。
