@@ -1,35 +1,30 @@
-# HPC AI 效能工程：模組學習路線
+# 九階段課綱與依賴
 
-[作品設計](../README.md)｜[現有機器安排](INFRASTRUCTURE.md)｜[工具選型分析](TOOL_SELECTION.md)｜[技術觀念講義](CONCEPTS.md)｜[作品成果對照](OUTCOMES.md)。依能力相依順序學習，沒有週數、截止日或指令數上限。下列模組數量來自不同的實驗問題與作品成果，帶練時若一個模組太大或前置知識不足，可以再拆。每個模組以「理解觀念 → 寫程式 → 做實驗 → 分析結果 → 留下作品」推進。
+[首頁](../README.md)｜[進度](../PROGRESS.md)｜[帶練方式](TEACHING.md)
 
-| 模組 | 要解決的問題 | 作品結果 | 對應職缺 | 使用技術 |
-|---|---|---|---|---|
-| [01 Linux 與量測方法](module-01.md) | 看到的慢是 CPU、記憶體、I/O、GPU，還是量測錯誤？ | 正確計時、環境快照、瓶頸假設與反證 | Linux 效能、系統架構 | `lscpu`、`vmstat`、`pidstat`、`iostat`、`perf stat`、`nvidia-smi`／DCGM（可用時）、CUDA Event |
-| [02 測試自動化與數據](module-02.md) | 如何批量重跑並可靠比較？ | `perfctl`、失敗處理、JSONL/SQLite、統計報告 | Python、自動化、資料分析、資料庫 | Python CLI、YAML、JSONL、CSV、SQLite、`EXPLAIN QUERY PLAN`；MLPerf Training 公平比較方法 |
-| [03 GPU 與 C++/CUDA](module-03.md) | kernel、記憶體傳輸和資料布局如何影響性能？ | 正確性可核對的 microbenchmark 與 profile | GPU、C/C++、系統架構 | C++、CUDA C++、CUDA Event、Nsight Compute |
-| [04 ML 訓練管線](module-04.md) | GPU 為何等待資料或算子？ | 真實資料集訓練與兩輪有證據的調校 | ML frameworks、Linux、儲存 | PyTorch `Dataset`／`DataLoader`／Profiler、Nsight Systems、`iostat` |
-| [05 LLM 訓練基礎](module-05.md) | 訓練 step 的時間與記憶體去哪裡？ | 可控模型與真實模型微調基準，記錄 loss／品質 | LLM、GPU、ML | PyTorch、Transformers、tokenizer、PEFT/LoRA、CUDA |
-| [06 LLM 訓練調校](module-06.md) | 何種設定改善吞吐，代價是什麼？ | 三輪 A/B、profiler trace、顯存／速度／品質取捨 | LLM 訓練效能分析 | PyTorch Profiler、AMP、SDPA、activation checkpointing、`torch.compile`（適用時） |
-| [07 TCP 網路效能](module-07.md) | 慢是 RTT、重傳、頻寬還是 CPU？ | 兩主機 TCP 指標、封包與吞吐曲線 | 網路協定、Linux | TCP、`ip`、`ss`、`ethtool`、`iperf3`、`tcpdump`（權限允許時） |
-| [08 分散式訓練機制](module-08.md) | rank 同步、DDP／FSDP 資料移動與工作放置如何影響效能？ | Gloo 最小正確性實作、DDP／FSDP／NCCL 路徑圖、多卡故障診斷與待驗證設計；有 Slurm 時加資源與工作內時間分析 | 分散式系統 | `torchrun`、PyTorch `torch.distributed`／Gloo、DDP／FSDP、張量／流水線並行機制、NCCL 診斷；Slurm `sbatch`／`srun`／GRES（可用時） |
-| [09 伺服器與儲存](module-09.md) | 資料讀取與 checkpoint 如何拖慢訓練？ | 本機／遠端路徑、page cache、I/O stall 證據 | 伺服器、儲存系統 | Linux 檔案系統、page cache、`iostat`、PyTorch checkpoint、本機／遠端儲存 |
-| [10 RDMA 架構與診斷](module-10.md) | TCP 結論哪些不能外推到 RDMA？ | 資料路徑與診斷報告；有硬體才加實測 | RDMA、網路協定 | RDMA verbs、RoCE／InfiniBand、`rdma link`、`ibv_devinfo`、`rping`／perftest（有硬體時） |
-| [11 雲端重現](module-11.md) | 換一個乾淨環境能否重跑結果？ | 現有 GPU VM 的乾淨容器複測、版本與成本；新 VM 供給條件式驗證 | 雲端運算 | Linux VM、容器、GPU driver／CUDA runtime、PyTorch、IaC（採用時） |
-| [12 開源貢獻與作品記錄](module-12.md) | 別人能否重現並使用成果？ | 上游貢獻、證據索引、專案文件 | 開源、合作溝通 | Git、上游 issue／PR、Markdown、版本固定與校驗值 |
+從階段 00 開始；先通過正確性與理解驗收，再擴大實驗。每個階段內的條目是多次教學的順序，不是一次要求執行的作業包。
 
-Slurm 在本路線作為 HPC 工作分配與放置的具體平台；沿用可用的叢集執行效能實驗，不再重建一套叢集。Ray 是有動態 Python 分散式工作流或團隊使用時的延伸，**不列為這份職缺的通用必修**。選型理由與單 GPU 邊界見[工具選型分析](TOOL_SELECTION.md)。
+| 階段 | 問題 | 前置 | 驗收 |
+|---|---|---|---|
+| [00 可信量測與系統觀察](stage-00.md) | 看到程式很忙，如何知道數字量對了，以及 CPU、等待和資料移動各占多少？ | 無；從此階段重新開始 | 能重跑 CPU 正確性與計時對照；有同次執行的負載輸出和程序指標；GPU 量測清楚分開端到端與裝置時間。 |
+| [01 從零理解一次訓練](stage-01.md) | 如何證明程式真的在學習，而不是只做預測或印出 loss？ | 階段 00 的 CPU 量測與環境確認 | 可逐段解釋自己寫的 loop；有非空且有限的梯度、參數更新與小資料學習證據；計時不包含不明確的工作。 |
+| [02 逐步建立 Python 量測工具](stage-02.md) | 如何可靠重跑同一工作並比較，讓失敗不會變成虛假的加速？ | 階段 01 已有可正確重跑的訓練程式 | 同規格一條命令重跑；從 JSONL 獨立重算摘要；失敗、逾時和環境不符可見；不以單次最快值報提升。 |
+| [03 ML 訓練管線瓶頸診斷](stage-03.md) | GPU 等待時，問題究竟在資料讀取、CPU 處理、傳輸，還是 GPU 運算？ | 階段 02；階段 01 的訓練機制 | 一份可開啟 timeline、時間分解、兩輪有預測與原始資料的 A/B；能說明接受或放棄調整的理由。 |
+| [04 C／C++ 與 CUDA 資料移動](stage-04.md) | 底層資料布局與傳輸如何限制端到端訓練？ | 階段 00 與 03；已看過一份訓練 trace | C／C++ 程式可自行修改與解釋；CPU／GPU 逐元素相符；有分段時間、頻寬曲線和受控實驗。 |
+| [05 LLM 真正訓練與可信基準](stage-05.md) | 如何量出一張 GPU 的 LLM 訓練能力，並證明數字不是推論或 padding 灌水？ | 階段 02、03；運用階段 04 的資料移動觀念 | 可控小模型與真實模型都有有效訓練證據；token 計數口徑清楚；模型、資料、batch、精度、版本與顯存可追溯。 |
+| [06 LLM 訓練效能調校](stage-06.md) | 怎樣提升吞吐或降低顯存，並說清楚代價及適用範圍？ | 階段 05 的正確性、基準與 trace | 三份假設、控制變因、trace、原始數據、品質與結論完整的報告；說清最佳已測設定及瓶頸是否轉移，不要求提升百分比。 |
+| [07 分散式系統、儲存與 RDMA](stage-07.md) | 工作變慢時，怎樣區分資源放置、資料路徑、慢 rank 和通訊限制？ | 階段 03、05；訓練基準已穩定 | 單卡系統調校案例、真實雙主機 TCP、Gloo／DDP 正確性、多卡資料路徑及 RDMA 診斷方案；每項明示已測或需設備。 |
+| [08 乾淨重現與面試交付](stage-08.md) | 如何讓別人重跑，並在追問下說清楚自己做了什麼？ | 階段 00–07 的實際證據；設備限制項可保留待測 | 四個成果入口、乾淨重跑證據、中文與英文講解；可追溯履歷敘述，並清楚說明單卡邊界。 |
 
-## 帶練方式
+## 共通量測門檻
 
-1. 先讀當前模組的名詞、目標和實驗設計，寫出預期結果及可能反例。
-2. 只執行本模組需要的命令；執行前記錄用途、會修改的檔案或服務。安裝、雲端資源和外部提交依當下授權處理。
-3. 每次實驗保存命令、環境版本、原始資料、圖和判讀。若結果與預測相反，調查原因，不改寫假設讓它看起來正確。
-4. 完成模組的程式、實驗與結果分析後更新進度。概念學習、程式完成、單機測試與跨節點測試分別標示，不合併聲稱。
+- 先有答案、梯度或參數更新的驗證，再分析速度；loss 有限本身不足以證明正確。
+- 固定硬體、工作負載、資料、精度與有效 batch 作同條件比較；精度或工作量改變時另列取捨實驗。
+- 暖機與正式量測分開；GPU 非同步須用適合範圍的同步或 CUDA event；端到端與 kernel 時間分開。
+- 從五次獨立 run 起步，揭露分散程度與失敗率；不穩定就查環境或增加樣本。逐步樣本不當成獨立 run。P95 若使用需揭露足夠樣本與不確定性，不因固定樣本數就宣稱可靠。
+- Profiler 用於定位，主要速度用無 profiler 的量測；診斷後重看瓶頸是否轉移。
+- 不要求正向提升，不刻意湊失敗；可驗收無效或不確定結果，但要有支持判斷的證據。
 
-## 單 GPU 邊界
+## 延伸項目
 
-單卡足以實測 GPU kernel、ML/LLM 訓練與資料供給。CPU 多節點可以驗證 PyTorch rank／collective 語意，網路性能由模組 07 的真實 TCP 實驗分析；CPU Gloo 延遲不能代替多 GPU NCCL 效能。RDMA、GPU Direct、NVLink、多 GPU 擴展率需要對應硬體。模組 08 學 DDP／FSDP／NCCL 機制與待驗證量測設計，模組 10 學 RDMA 架構與診斷；沒有設備時清楚標記「設計，未實測」。
-
-## 專案證據狀態
-
-本路線目前是規劃。任何「已完成」必須連到可重跑的程式、實際命令、原始結果和判讀。既有 `hpc-arch` 可提供實驗環境，但它的舊結果不能冒充本作品的新量測。
+SQLite 索引／WAL 深度、上游投稿、Ray、推論服務、重新部署 Kubernetes／OpenStack 均依實際需要選修，不作核心階段的先決條件。多 GPU／RDMA 實測為設備條件式驗收。
